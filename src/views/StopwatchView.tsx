@@ -72,18 +72,18 @@ export default function StopwatchView() {
 
   return (
     <div className="flex flex-col items-center pt-12 md:pt-0 md:justify-center px-6 w-full max-w-5xl mx-auto flex-1 md:h-[calc(100vh-4rem)]">
-      <div className="flex flex-col-reverse items-center justify-center w-full gap-8 lg:gap-12">
+      <div className="flex flex-col md:flex-row items-center justify-center w-full gap-8 lg:gap-24">
         {/* Drastic Circular Stopwatch Display */}
         <div className="relative w-full max-w-[300px] sm:max-w-[320px] lg:max-w-[400px] aspect-square flex flex-col items-center justify-center mb-8 md:mb-0 mt-4 md:mt-0 shrink-0">
         
         {/* SVG Rings with Advanced Effects */}
         <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full drop-shadow-[0_0_30px_rgba(var(--color-primary),0.2)] overflow-visible">
           <defs>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
               <feGaussianBlur stdDeviation="4" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
-            <filter id="glow-intense" x="-50%" y="-50%" width="200%" height="200%">
+            <filter id="glow-intense" x="-100%" y="-100%" width="300%" height="300%">
               <feGaussianBlur stdDeviation="8" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
@@ -212,12 +212,12 @@ export default function StopwatchView() {
 
         {/* CSS Rotating Gear */}
         <div
-          className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/20 pointer-events-none flex items-center justify-center"
-          style={{ animation: 'spin 30s linear infinite', animationPlayState: isRunning ? 'running' : 'paused' }}
+          className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/20 pointer-events-none flex items-center justify-center animate-spin"
+          style={{ animationDuration: '30s', animationPlayState: isRunning ? 'running' : 'paused' }}
         >
             <div
-              className="w-full h-full rounded-full border-[1px] border-dotted border-primary/30 scale-[0.85]"
-              style={{ animation: 'spin 20s linear infinite reverse', animationPlayState: isRunning ? 'running' : 'paused' }}
+              className="w-full h-full rounded-full border-[1px] border-dotted border-primary/30 scale-[0.85] animate-spin"
+              style={{ animationDuration: '20s', animationDirection: 'reverse', animationPlayState: isRunning ? 'running' : 'paused' }}
             />
         </div>
 
@@ -284,22 +284,25 @@ export default function StopwatchView() {
               </div>
               <div className="space-y-3 max-h-[40vh] md:max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 <AnimatePresence initial={false}>
-                  {laps.map((lap, index) => {
-                    const isBest = index === laps.length - 1 && laps.length > 1; // Simplistic best lap logic for demo
-                    return (
-                      <motion.div 
-                        key={lap.id}
-                        initial={{ opacity: 0, y: -20, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: 'auto' }}
-                        exit={{ opacity: 0, scale: 0.9, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex items-center justify-between p-5 bg-surface-container-low rounded-xl relative overflow-hidden border border-white/5"
-                      >
-                        {isBest && <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>}
-                        <div className="flex items-center gap-6">
-                          <span className="text-xs font-bold text-on-surface-variant font-label w-6 text-right">
-                            {(laps.length - index).toString().padStart(2, '0')}
-                          </span>
+                  {laps.map((lap, i) => ({ ...lap, lapNumber: laps.length - i }))
+                    .sort((a, b) => a.diff - b.diff)
+                    .map((lap, index) => {
+                      const isBest = index === 0 && laps.length > 1; 
+                      return (
+                        <motion.div 
+                          key={lap.id}
+                          initial={{ opacity: 0, y: -20, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: 'auto' }}
+                          exit={{ opacity: 0, scale: 0.9, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          layout
+                          className="flex items-center justify-between p-5 bg-surface-container-low rounded-xl relative overflow-hidden border border-white/5"
+                        >
+                          {isBest && <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>}
+                          <div className="flex items-center gap-6">
+                            <span className="text-xs font-bold text-on-surface-variant font-label w-6 text-right">
+                              {lap.lapNumber.toString().padStart(2, '0')}
+                            </span>
                           <div>
                             <div className={cn("text-lg font-bold tracking-tight font-digital", isBest ? "text-secondary" : "text-on-surface")}>
                               {formatTime(lap.time)}
