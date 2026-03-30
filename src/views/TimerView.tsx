@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Volume2, VolumeX, Settings2, X } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, VolumeX, Settings2, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, vibrate, playBeep } from '../lib/utils';
 import { saveSession } from '../lib/stats';
@@ -19,6 +19,7 @@ export default function TimerView({ presetMinutes = 25, presetName, onFocusModeC
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [currentPresetName, setCurrentPresetName] = useState<string | undefined>(presetName);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // AFK Detection
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function TimerView({ presetMinutes = 25, presetName, onFocusModeC
       }, 1000);
     } else if (isActive && timeLeft === 0) {
       setIsActive(false);
+      setShowCelebration(true);
       vibrate([100, 100, 100, 100, 300]); // Completion haptic pattern
       if (soundEnabled) {
         playBeep(880, 200, 0.2);
@@ -345,6 +347,103 @@ export default function TimerView({ presetMinutes = 25, presetName, onFocusModeC
                 Set Timer
               </button>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Celebration Modal */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-background/90 backdrop-blur-md overflow-hidden"
+          >
+            {/* Particles */}
+            {Array.from({ length: 50 }).map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+                animate={{ 
+                  x: (Math.random() - 0.5) * (typeof window !== 'undefined' ? window.innerWidth : 1000) * 0.8, 
+                  y: (Math.random() - 0.5) * (typeof window !== 'undefined' ? window.innerHeight : 800) * 0.8,
+                  scale: Math.random() * 1.5 + 0.5,
+                  opacity: 0,
+                }}
+                transition={{ 
+                  duration: Math.random() * 2 + 1, 
+                  ease: "easeOut",
+                  delay: Math.random() * 0.2
+                }}
+                className="absolute w-3 h-3 rounded-full md:w-4 md:h-4 pointer-events-none"
+                style={{
+                  backgroundColor: `hsl(${Math.random() * 360}, 80%, 60%)`,
+                  boxShadow: `0 0 10px hsl(${Math.random() * 360}, 80%, 60%)`
+                }}
+              />
+            ))}
+
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 1.2 }}
+              className="text-primary drop-shadow-[0_0_60px_var(--color-primary)] mb-8 z-10"
+            >
+              <Sparkles size={120} className="fill-transparent stroke-[1.5]" />
+            </motion.div>
+            
+            <motion.h2
+              initial={{ y: 50, opacity: 0, scale: 0.8 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", bounce: 0.5 }}
+              className="font-headline text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-primary bg-300% animate-gradient mb-4 timer-glow text-center z-10"
+              style={{ backgroundSize: '200% auto', animation: 'pulse 3s linear infinite' }}
+            >
+              Session Complete!
+            </motion.h2>
+            
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-on-surface-variant text-xl md:text-2xl mb-12 font-medium tracking-wide z-10"
+            >
+              Great work staying focused.
+            </motion.p>
+            
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 30px var(--color-primary)" }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ delay: 0.7 }}
+              onClick={() => {
+                vibrate(40);
+                setShowCelebration(false);
+                resetTimer();
+              }}
+              className="px-12 py-4 rounded-full bg-primary text-on-primary-container font-label uppercase tracking-[0.2em] font-bold text-lg glow-primary hover:bg-primary/90 transition-all z-10"
+            >
+              Continue
+            </motion.button>
+
+            {/* Background Animated Rings */}
+            <motion.div
+              animate={{ scale: [1, 3, 5], opacity: [0.8, 0, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+              className="absolute inset-0 m-auto w-48 h-48 rounded-full border-4 border-primary/40 pointer-events-none"
+            />
+            <motion.div
+              animate={{ scale: [1, 2, 4], opacity: [0.5, 0, 0] }}
+              transition={{ duration: 2.5, delay: 0.4, repeat: Infinity, ease: "easeOut" }}
+              className="absolute inset-0 m-auto w-48 h-48 rounded-full border-4 border-primary/30 pointer-events-none"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.5, 3], opacity: [0.3, 0, 0] }}
+              transition={{ duration: 2.5, delay: 0.8, repeat: Infinity, ease: "easeOut" }}
+              className="absolute inset-0 m-auto w-48 h-48 rounded-full border-4 border-primary/20 pointer-events-none"
+            />
           </motion.div>
         )}
       </AnimatePresence>
