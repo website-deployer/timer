@@ -44,9 +44,9 @@ export default function StopwatchView() {
   const addLap = () => {
     vibrate(30);
     if (time === 0) return;
-    const totalElapsed = laps.reduce((acc, l) => acc + l.diff, 0) + time;
-    setLaps([{ id: Date.now(), time: totalElapsed, diff: time }, ...laps]);
-    setTime(0);
+    const lastLapTime = laps.length > 0 ? laps[0].time : 0;
+    const diff = time - lastLapTime;
+    setLaps([{ id: Date.now(), time, diff }, ...laps]);
   };
 
   const formatTime = (ms: number) => {
@@ -62,13 +62,7 @@ export default function StopwatchView() {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
   };
 
-  const formatDiff = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const milliseconds = Math.floor((ms % 1000) / 10);
-    return `+${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
-  };
+
 
   return (
     <div className="flex flex-col items-center pt-12 md:pt-0 md:justify-center px-6 w-full max-w-5xl mx-auto flex-1 md:h-[calc(100vh-4rem)]">
@@ -305,16 +299,19 @@ export default function StopwatchView() {
                             </span>
                           <div>
                             <div className={cn("text-lg font-bold tracking-tight font-digital", isBest ? "text-secondary" : "text-on-surface")}>
-                              {formatTime(lap.time)}
+                              {formatTime(lap.diff)}
                             </div>
                             <div className="text-[10px] text-on-surface-variant uppercase tracking-widest font-label mt-1">
-                              {isBest ? 'Personal Best' : 'Split Time'}
+                              {isBest ? 'Personal Best' : 'Lap Time'}
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className={cn("text-sm font-medium font-headline", isBest ? "text-on-surface-variant" : "text-error")}>
-                            {formatDiff(lap.diff)}
+                        <div className="text-right flex flex-col items-end">
+                          <div className={cn("text-sm font-medium font-headline", "text-on-surface-variant")}>
+                            {formatTime(lap.time)}
+                          </div>
+                          <div className="text-[10px] text-on-surface-variant uppercase tracking-widest font-label mt-1">
+                            Total
                           </div>
                         </div>
                       </motion.div>
