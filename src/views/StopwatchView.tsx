@@ -161,13 +161,35 @@ export default function StopwatchView() {
         {/* Ambient Pulse when running */}
         <AnimatePresence>
           {isRunning && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0.1, 0.25, 0.1], scale: [1, 1.05, 1] }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 rounded-full bg-primary/20 blur-3xl -z-10 pointer-events-none"
-            />
+            <>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: [0.1, 0.25, 0.1], scale: [1, 1.05, 1] }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 rounded-full bg-primary/20 blur-3xl -z-10 pointer-events-none"
+              />
+              <motion.div
+                initial={{ opacity: 0.8, scale: 0.9 }}
+                animate={{ opacity: 0, scale: 1.4 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                className="absolute inset-0 rounded-full border border-primary/50 pointer-events-none"
+              />
+              <motion.div
+                initial={{ opacity: 0.8, scale: 0.9 }}
+                animate={{ opacity: 0, scale: 1.4 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, delay: 0.75, repeat: Infinity, ease: "easeOut" }}
+                className="absolute inset-0 rounded-full border border-secondary/50 pointer-events-none"
+              />
+              {/* Rotating gear inside */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-8 rounded-full border-[1px] border-dashed border-white/10 pointer-events-none"
+              />
+            </>
           )}
         </AnimatePresence>
 

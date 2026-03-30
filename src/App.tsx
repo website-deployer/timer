@@ -40,7 +40,7 @@ export default function App() {
           >
             <div className="flex items-center gap-3 text-primary font-bold tracking-widest uppercase bg-background/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/5 pointer-events-auto">
               <Timer size={20} strokeWidth={2.5} />
-              <span className="text-sm">Nova Timer</span>
+              <span className="text-sm">Timer Stack</span>
             </div>
           </motion.header>
         )}
