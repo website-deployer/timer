@@ -7,27 +7,25 @@ export default function StopwatchView() {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [laps, setLaps] = useState<{ id: number; time: number; diff: number }[]>([]);
-  const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
-
-  const animate = (timeNow: number) => {
-    if (previousTimeRef.current !== undefined) {
-      const deltaTime = timeNow - previousTimeRef.current;
-      setTime((prevTime) => prevTime + deltaTime);
-    }
-    previousTimeRef.current = timeNow;
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
   useEffect(() => {
+    let animationFrameId: number;
+    let lastTime: number | undefined;
+
+    const tick = (timeNow: number) => {
+      if (lastTime !== undefined) {
+        const deltaTime = timeNow - lastTime;
+        setTime((prevTime) => prevTime + deltaTime);
+      }
+      lastTime = timeNow;
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
     if (isRunning) {
-      requestRef.current = requestAnimationFrame(animate);
-    } else {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      previousTimeRef.current = undefined;
+      animationFrameId = requestAnimationFrame(tick);
     }
+
     return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [isRunning]);
 
@@ -41,7 +39,6 @@ export default function StopwatchView() {
     setIsRunning(false);
     setTime(0);
     setLaps([]);
-    previousTimeRef.current = undefined;
   };
 
   const addLap = () => {
@@ -156,7 +153,6 @@ export default function StopwatchView() {
             strokeDashoffset={2 * Math.PI * 142 * (1 - (time % 60000) / 60000)}
             strokeLinecap="round"
             transform="rotate(-90 150 150)"
-            className="transition-all duration-[50ms]"
           />
 
           {/* Outer Track Intense Head Dot */}
@@ -189,15 +185,15 @@ export default function StopwatchView() {
 
         {/* Lap Ripple Effect */}
         <AnimatePresence>
-          {laps.length > 0 && (
+          {laps.slice(0, 3).map((lap) => (
             <motion.div
-              key={`ripple-${laps.length}`}
+              key={`ripple-${lap.id}`}
               initial={{ opacity: 0.8, scale: 0.8, borderWidth: '8px' }}
-              animate={{ opacity: 0, scale: 1.5, borderWidth: '0px' }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              animate={{ opacity: 0, scale: 1.8, borderWidth: '0px' }}
+              transition={{ duration: 1, ease: "easeOut" }}
               className="absolute inset-0 rounded-full border-secondary pointer-events-none drop-shadow-[0_0_20px_var(--color-secondary)]"
             />
-          )}
+          ))}
         </AnimatePresence>
 
         {/* Advanced Sonar & Ambient Pulse when running */}
