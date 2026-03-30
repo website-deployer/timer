@@ -79,10 +79,51 @@ export default function StopwatchView() {
         {/* Drastic Circular Stopwatch Display */}
         <div className="relative w-full max-w-[300px] sm:max-w-[320px] lg:max-w-[400px] aspect-square flex flex-col items-center justify-center mb-8 md:mb-0 mt-4 md:mt-0 shrink-0">
         
-        {/* SVG Rings */}
-        <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full drop-shadow-2xl overflow-visible">
-          {/* Outer Track (60 seconds) */}
-          <circle cx="150" cy="150" r="140" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/5" />
+        {/* SVG Rings with Advanced Effects */}
+        <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full drop-shadow-[0_0_30px_rgba(var(--color-primary),0.2)] overflow-visible">
+          <defs>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="glow-intense" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <linearGradient id="primary-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="var(--color-primary)" />
+              <stop offset="100%" stopColor="var(--color-secondary)" />
+            </linearGradient>
+            <linearGradient id="secondary-gradient" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="var(--color-secondary)" />
+              <stop offset="100%" stopColor="var(--color-primary)" />
+            </linearGradient>
+          </defs>
+
+          {/* Precision Tick Marks */}
+          {Array.from({ length: 120 }).map((_, i) => {
+             const angle = (i * 3) * (Math.PI / 180);
+             const isMajor = i % 10 === 0;
+             const isMedium = i % 5 === 0;
+             const rInner = isMajor ? 130 : isMedium ? 135 : 138;
+             const rOuter = 142;
+             const x1 = 150 + rInner * Math.sin(angle);
+             const y1 = 150 - rInner * Math.cos(angle);
+             const x2 = 150 + rOuter * Math.sin(angle);
+             const y2 = 150 - rOuter * Math.cos(angle);
+             return (
+               <line 
+                 key={`tick-${i}`} 
+                 x1={x1} y1={y1} x2={x2} y2={y2} 
+                 stroke="currentColor" 
+                 strokeWidth={isMajor ? 2.5 : 1} 
+                 className={cn("transition-opacity duration-300", isMajor ? "text-white/40" : isMedium ? "text-white/20" : "text-white/10")} 
+               />
+             )
+          })}
+          
+          {/* Outer Track Base */}
+          <circle cx="150" cy="150" r="142" fill="none" stroke="currentColor" strokeWidth="1" className="text-white/5" />
           
           {/* Lap markers on Outer Track */}
           <AnimatePresence>
@@ -97,51 +138,52 @@ export default function StopwatchView() {
                   stroke="currentColor" 
                   strokeWidth="4" 
                   strokeLinecap="round"
-                  className="text-secondary" 
+                  className="text-secondary drop-shadow-[0_0_8px_var(--color-secondary)]" 
                   transform={`rotate(${angle} 150 150)`} 
                 />
               );
             })}
           </AnimatePresence>
 
-          {/* Outer Track Progress (Seconds) */}
+          {/* Outer Track Progress (Seconds) with Comet Tail */}
           <circle 
-            cx="150" cy="150" r="140" 
+            cx="150" cy="150" r="142" 
             fill="none" 
-            stroke="currentColor" 
-            strokeWidth="4" 
-            className="text-primary/40"
-            strokeDasharray={2 * Math.PI * 140}
-            strokeDashoffset={2 * Math.PI * 140 * (1 - (time % 60000) / 60000)}
+            stroke="url(#primary-gradient)" 
+            strokeWidth="6" 
+            filter="url(#glow)"
+            strokeDasharray={2 * Math.PI * 142}
+            strokeDashoffset={2 * Math.PI * 142 * (1 - (time % 60000) / 60000)}
             strokeLinecap="round"
             transform="rotate(-90 150 150)"
+            className="transition-all duration-[50ms]"
           />
 
-          {/* Outer Track Dot */}
+          {/* Outer Track Intense Head Dot */}
           <g transform={`rotate(${((time % 60000) / 60000) * 360} 150 150)`}>
-            <circle cx="150" cy="10" r="8" fill="currentColor" className="text-primary" style={{ filter: 'drop-shadow(0 0 8px currentColor)' }} />
-            <circle cx="150" cy="10" r="3" fill="white" />
+            <circle cx="150" cy="8" r="8" fill="var(--color-primary)" filter="url(#glow-intense)" />
+            <circle cx="150" cy="8" r="3" fill="#ffffff" />
           </g>
 
-          {/* Inner Track (1 second) - The "Drastic" fast part */}
-          <circle cx="150" cy="150" r="115" fill="none" stroke="currentColor" strokeWidth="1" className="text-white/5" />
+          {/* Inner Track (1 second precision) */}
+          <circle cx="150" cy="150" r="115" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" className="text-white/10" />
           
           {/* Inner Track Progress (Milliseconds) */}
           <circle 
             cx="150" cy="150" r="115" 
             fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            className="text-secondary/30"
+            stroke="url(#secondary-gradient)" 
+            strokeWidth="3" 
+            filter="url(#glow)"
             strokeDasharray={2 * Math.PI * 115}
             strokeDashoffset={2 * Math.PI * 115 * (1 - (time % 1000) / 1000)}
             strokeLinecap="round"
             transform="rotate(-90 150 150)"
           />
 
-          {/* Inner Track Dot */}
+          {/* Inner Track Head Dot */}
           <g transform={`rotate(${((time % 1000) / 1000) * 360} 150 150)`}>
-            <circle cx="150" cy="35" r="5" fill="currentColor" className="text-secondary" style={{ filter: 'drop-shadow(0 0 6px currentColor)' }} />
+            <circle cx="150" cy="35" r="5" fill="var(--color-secondary)" filter="url(#glow-intense)" />
           </g>
         </svg>
 
@@ -150,65 +192,81 @@ export default function StopwatchView() {
           {laps.length > 0 && (
             <motion.div
               key={`ripple-${laps.length}`}
-              initial={{ opacity: 0.8, scale: 0.8 }}
-              animate={{ opacity: 0, scale: 1.3 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="absolute inset-0 rounded-full border-4 border-secondary pointer-events-none"
+              initial={{ opacity: 0.8, scale: 0.8, borderWidth: '8px' }}
+              animate={{ opacity: 0, scale: 1.5, borderWidth: '0px' }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="absolute inset-0 rounded-full border-secondary pointer-events-none drop-shadow-[0_0_20px_var(--color-secondary)]"
             />
           )}
         </AnimatePresence>
 
-        {/* Ambient Pulse when running */}
+        {/* Advanced Sonar & Ambient Pulse when running */}
         <AnimatePresence>
           {isRunning && (
             <>
+              {/* Core Breathing Nebula */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: [0.1, 0.25, 0.1], scale: [1, 1.05, 1] }}
+                animate={{ opacity: [0.15, 0.4, 0.15], scale: [1, 1.1, 1], rotate: [0, 90, 180] }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 rounded-full bg-primary/20 blur-3xl -z-10 pointer-events-none"
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-[10%] rounded-full bg-gradient-to-tr from-primary/30 to-secondary/30 blur-3xl -z-10 pointer-events-none mix-blend-screen"
               />
-              <motion.div
-                initial={{ opacity: 0.8, scale: 0.9 }}
-                animate={{ opacity: 0, scale: 1.4 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                className="absolute inset-0 rounded-full border border-primary/50 pointer-events-none"
-              />
-              <motion.div
-                initial={{ opacity: 0.8, scale: 0.9 }}
-                animate={{ opacity: 0, scale: 1.4 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1.5, delay: 0.75, repeat: Infinity, ease: "easeOut" }}
-                className="absolute inset-0 rounded-full border border-secondary/50 pointer-events-none"
-              />
-              {/* Rotating gear inside */}
+              
+              {/* Expanding Rings */}
+              {Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={`sonar-${i}`}
+                  initial={{ opacity: 0.6, scale: 0.95 }}
+                  animate={{ opacity: 0, scale: 1.6 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ 
+                    duration: 2, 
+                    delay: i * 0.66, 
+                    repeat: Infinity, 
+                    ease: "cubic-bezier(0.1, 0.8, 0.3, 1)" 
+                  }}
+                  className={cn(
+                    "absolute inset-0 rounded-full border pointer-events-none",
+                    i % 2 === 0 ? "border-primary/40 shadow-[0_0_15px_var(--color-primary)]" : "border-secondary/40 shadow-[0_0_15px_var(--color-secondary)]"
+                  )}
+                />
+              ))}
+
+              {/* Advanced Rotating Gear */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-8 rounded-full border-[1px] border-dashed border-white/10 pointer-events-none"
-              />
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/20 pointer-events-none flex items-center justify-center"
+              >
+                  <motion.div
+                    animate={{ rotate: -720 }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    className="w-full h-full rounded-full border-[1px] border-dotted border-primary/30 scale-[0.85]"
+                  />
+              </motion.div>
             </>
           )}
         </AnimatePresence>
 
-        {/* Digital Display inside the circle */}
+        {/* Digital Display inside the circle with animated 3D press effect */}
         <motion.div 
           animate={{ 
-            scale: isRunning ? 1.05 : 1,
+            scale: isRunning ? 1 : 0.98,
+            boxShadow: isRunning ? "inset 0 0 40px rgba(0,0,0,0.6), 0 0 30px rgba(var(--color-primary-rgb), 0.2)" : "inset 0 0 20px rgba(0,0,0,0.4), 0 0 0px transparent"
           }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative z-10 flex flex-col items-center justify-center bg-background/40 backdrop-blur-sm rounded-full w-[200px] h-[200px] border border-white/5 shadow-inner"
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="relative z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-md rounded-full w-[220px] h-[220px] border border-white/10"
         >
-          <div className="text-[clamp(2.5rem,5vw,3.5rem)] font-bold tracking-tighter leading-none text-on-surface flex items-baseline font-digital">
+          <div className="text-[clamp(3rem,6vw,4.5rem)] font-bold tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 flex items-baseline font-digital filter drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] mt-4">
             <span>{formatTime(time).split('.')[0]}</span>
           </div>
-          <div className="text-secondary text-[clamp(1.5rem,3vw,2rem)] font-bold font-digital mt-1">
+          <div className="text-secondary text-[clamp(1.5rem,3vw,2rem)] font-bold font-digital mt-[-4px] tracking-widest filter drop-shadow-[0_0_8px_var(--color-secondary)]">
             .{formatTime(time).split('.')[1] || '00'}
           </div>
-          <div className="text-on-surface-variant font-label tracking-[0.3em] uppercase text-[9px] mt-4">
-            {isRunning ? "Active" : "Ready"}
+          <div className="text-on-surface-variant font-label tracking-[0.4em] uppercase text-[10px] mt-4 font-bold flex items-center gap-2">
+            {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-error animate-pulse shadow-[0_0_5px_var(--color-error)]" />}
+            {isRunning ? "Running" : "Standby"}
           </div>
         </motion.div>
       </div>
