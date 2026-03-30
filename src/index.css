@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700;900&family=Share+Tech+Mono&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0e0e0e;
+  --color-surface: #131313;
+  --color-surface-container-low: #1c1b1b;
+  --color-surface-container-highest: #262626;
+  
+  --color-primary: #6dddff;
+  --color-primary-container: #00d2fd;
+  --color-on-primary-container: #004352;
+  
+  --color-secondary: #6dddff;
+  --color-secondary-dim: #00d2fd;
+  
+  --color-tertiary: #82a3ff;
+  
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #bbc9cf;
+  --color-outline: #353534;
+  --color-outline-variant: #494847;
+  
+  --color-error: #ff716c;
+
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-label: 'Inter', sans-serif;
+  --font-digital: 'Share Tech Mono', monospace;
+}
+
+@layer utilities {
+  .timer-glow {
+    text-shadow: 0 0 15px var(--color-primary);
+  }
+  @media (min-width: 768px) {
+    .timer-glow {
+      text-shadow: 0 0 40px var(--color-primary);
+    }
+  }
+  .timer-glow-secondary {
+    text-shadow: 0 0 15px var(--color-secondary);
+  }
+  @media (min-width: 768px) {
+    .timer-glow-secondary {
+      text-shadow: 0 0 40px var(--color-secondary);
+    }
+  }
+  .glass-panel {
+    background: rgba(38, 38, 38, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glow-primary {
+    box-shadow: 0 0 32px var(--color-primary);
+  }
+  .glow-secondary {
+    box-shadow: 0 0 32px var(--color-secondary);
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
