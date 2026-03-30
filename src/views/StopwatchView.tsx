@@ -44,9 +44,9 @@ export default function StopwatchView() {
   const addLap = () => {
     vibrate(30);
     if (time === 0) return;
-    const lastLapTime = laps.length > 0 ? laps[0].time : 0;
-    const diff = time - lastLapTime;
-    setLaps([{ id: Date.now(), time, diff }, ...laps]);
+    const totalElapsed = laps.reduce((acc, l) => acc + l.diff, 0) + time;
+    setLaps([{ id: Date.now(), time: totalElapsed, diff: time }, ...laps]);
+    setTime(0);
   };
 
   const formatTime = (ms: number) => {
@@ -72,7 +72,7 @@ export default function StopwatchView() {
 
   return (
     <div className="flex flex-col items-center pt-12 md:pt-0 md:justify-center px-6 w-full max-w-5xl mx-auto flex-1 md:h-[calc(100vh-4rem)]">
-      <div className="flex flex-col md:flex-row items-center justify-center w-full gap-8 lg:gap-24">
+      <div className="flex flex-col-reverse items-center justify-center w-full gap-8 lg:gap-12">
         {/* Drastic Circular Stopwatch Display */}
         <div className="relative w-full max-w-[300px] sm:max-w-[320px] lg:max-w-[400px] aspect-square flex flex-col items-center justify-center mb-8 md:mb-0 mt-4 md:mt-0 shrink-0">
         
@@ -196,54 +196,30 @@ export default function StopwatchView() {
           ))}
         </AnimatePresence>
 
-        {/* Advanced Sonar & Ambient Pulse when running */}
+        {/* Ambient Pulse when running */}
         <AnimatePresence>
           {isRunning && (
-            <>
-              {/* Core Breathing Nebula */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: [0.15, 0.4, 0.15], scale: [1, 1.1, 1], rotate: [0, 90, 180] }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-[10%] rounded-full bg-gradient-to-tr from-primary/30 to-secondary/30 blur-3xl -z-10 pointer-events-none mix-blend-screen"
-              />
-              
-              {/* Expanding Rings */}
-              {Array.from({ length: 3 }).map((_, i) => (
-                <motion.div
-                  key={`sonar-${i}`}
-                  initial={{ opacity: 0.6, scale: 0.95 }}
-                  animate={{ opacity: 0, scale: 1.6 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ 
-                    duration: 2, 
-                    delay: i * 0.66, 
-                    repeat: Infinity, 
-                    ease: "cubic-bezier(0.1, 0.8, 0.3, 1)" 
-                  }}
-                  className={cn(
-                    "absolute inset-0 rounded-full border pointer-events-none",
-                    i % 2 === 0 ? "border-primary/40 shadow-[0_0_15px_var(--color-primary)]" : "border-secondary/40 shadow-[0_0_15px_var(--color-secondary)]"
-                  )}
-                />
-              ))}
-
-              {/* Advanced Rotating Gear */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/20 pointer-events-none flex items-center justify-center"
-              >
-                  <motion.div
-                    animate={{ rotate: -720 }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                    className="w-full h-full rounded-full border-[1px] border-dotted border-primary/30 scale-[0.85]"
-                  />
-              </motion.div>
-            </>
+            <motion.div 
+              key="nebula"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.3, scale: 1, rotate: 180 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-10 rounded-full bg-gradient-to-tr from-primary/30 to-secondary/30 blur-3xl -z-10 pointer-events-none mix-blend-screen"
+            />
           )}
         </AnimatePresence>
+
+        {/* CSS Rotating Gear */}
+        <div
+          className="absolute inset-4 rounded-full border-[2px] border-dashed border-white/20 pointer-events-none flex items-center justify-center"
+          style={{ animation: 'spin 30s linear infinite', animationPlayState: isRunning ? 'running' : 'paused' }}
+        >
+            <div
+              className="w-full h-full rounded-full border-[1px] border-dotted border-primary/30 scale-[0.85]"
+              style={{ animation: 'spin 20s linear infinite reverse', animationPlayState: isRunning ? 'running' : 'paused' }}
+            />
+        </div>
 
         {/* Digital Display inside the circle with animated 3D press effect */}
         <motion.div 
